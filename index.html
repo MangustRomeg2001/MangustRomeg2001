@@ -1,216 +1,339 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conteo de Personas</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
-        }
-        .contador {
-            margin: 20px;
-            display: inline-block;   
-        }
-        input[type="number"] {
-            width: 30%;
-            text-align: center;
-            font-size: 18px;
-            color: #000;
-            background-color: #f0f0f0;
-            border: none;
-            border-radius: 5px;
-        }
-        .hombre-button, .mujer-button, .limpiar-button, .guardar-button {
-            font-size: 18px;
-            padding: 3% 5%;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            position: relative;
-            margin: 0 5px;
-        }
-        .hombre-button {
-            background-color:  #87ceeb; /* azul claro */
-            color: #fff;
-        }
-        .hombre-button:hover {
-            background-color: #add8e6 ; /* azul más oscuro */
-        }
-        .mujer-button {
-            background-color: #ff69b4; /* rosa */
-            color: #fff;
-        }
-        .mujer-button:hover {
-            background-color: #ff1493; /* rosa más oscuro */
-        }
-        .limpiar-button {
-            background-color: #008000; /* verde */
-            color: #fff;
-        }
-        .limpiar-button:hover {
-            background-color: #006400; /* verde más oscuro */
-        }
-        .guardar-button {
-            background-color: #4caf50; /* verde */
-            color: #fff;
-        }
-        .guardar-button:hover {
-            background-color: #45a049; /* verde más oscuro */
-        }
-        .tooltip {
-            visibility: hidden;
-            width: 120px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -60px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .tooltip::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: #333 transparent transparent transparent;
-        }
-        .limpiar-button:hover .tooltip, .guardar-button:hover .tooltip {
-            visibility: visible;
-            opacity: 1;
-        }
-        #fechaHora {
-            font-size: 16px;
-        }
-        .mensajes {
-            background-color: #f3f3f3;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 20px;
-            text-align: center;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planificador de Producción</title>
+  <style>
+    /* Reset básico */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f3f3f3;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .planner-container {
+      max-width: 1000px;
+      margin: auto;
+      overflow-x: auto;
+    }
+    /* Etapas de Producción */
+    .stages {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .stage {
+      display: inline-flex;
+      align-items: center;
+      font-size: 12px;
+      gap: 5px;
+    }
+    .stage::before {
+      content: '';
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .stage[data-stage="impresion"]::before { background-color: black; }
+    .stage[data-stage="sellado"]::before { background-color: gray; }
+    .stage[data-stage="fusionado"]::before { background-color: darkgray; }
+    .stage[data-stage="troquelado"]::before { background-color: silver; }
+    .stage[data-stage="hotstamping"]::before { background-color: darkslategray; }
 
-	label {
-        font-size: 30px;
-        }
-	txt {
-	font-size: 30px;
-	}
+    /* Tabla de Horario Semanal */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      background-color: #e3e3e3;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #c1c1c1;
+      padding: 10px;
+    }
+    th {
+      background-color: #236B8E;
+      color: #fff;
+    }
+    .hour-col {
+      width: 60px;
+      background-color: #1D4E6A;
+      color: white;
+    }
+    .task {
+      background-color: #0073AA;
+      color: white;
+      padding: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .task .stage-label {
+      font-weight: bold;
+    }
 
-    </style>
+    /* Estilo del Formulario */
+    .task-form {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .task-form input, .task-form select, .task-form button {
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+    .task-form button {
+      background-color: #0073AA;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .task-form button:hover {
+      background-color: #005f87;
+    }
+
+    /* Tabla de Tareas */
+    .task-table {
+      margin-top: 30px;
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .task-table th, .task-table td {
+      border: 1px solid #c1c1c1;
+      padding: 8px;
+      text-align: left;
+    }
+    .task-table th {
+      background-color: #444;
+      color: #fff;
+    }
+  </style>
 </head>
 <body>
-    <div style="position: absolute; right: 20px; top: 20px;">
-        <button class="limpiar-button" onclick="limpiarContadores()" style="width: 40px; height: 40px;">
-            <i class="fas fa-sync-alt"></i> 
-            <div class="tooltip">Restablece los contadores a cero</div>
-        </button>
-        <button class="guardar-button" onclick="guardarDatos()" style="width: 40px; height: 40px;">
-            <i class="fas fa-save"></i>
-            <div class="tooltip">Guarda los conteos en el almacenamiento local</div>
-        </button>
-    </div>
-		<br>
-		<br>
-    
-    <h1>Centro de información Insntituto Tecnologico de Tlalpan</h1>	
-    <h2>Conteo de Personas</h2>
-    
-    <p>Fecha y Hora Actual: <span id="fechaHora"></span></p>
 
-    <div class="contador">
-        <label for="hombres">Hombres:</label>
-        <input class="txt" type="number" id="hombres" value="0">
-	<br>
-	<br>
-        <button class="hombre-button" onclick="sumarHombre()" " style="width: 200px; height: 180px;">+1 Hombre</button>
-    </div>
+  <h1>Planificador de Producción</h1>
 
-    <div class="contador">
-        <label for="mujeres">Mujeres:</label>
-        <input type="number" id="mujeres" value="0">
-	<br>
-	<br>
-        <button class="mujer-button" onclick="sumarMujer()" " style="width: 200px; height: 180px;">+1 Mujer</button>
-    </div>
+  <!-- Leyenda de Etapas de Producción -->
+  <div class="stages">
+    <div class="stage" data-stage="impresion">Impresión</div>
+    <div class="stage" data-stage="sellado">Sellado</div>
+    <div class="stage" data-stage="fusionado">Fusionado</div>
+    <div class="stage" data-stage="troquelado">Troquelado</div>
+    <div class="stage" data-stage="hotstamping">Hotstamping</div>
+  </div>
 
-    <div class="mensajes" id="mensajeInicial" style="display:none;">
-        <p>No olvides limpiar los contadores.</p>
-    </div>
+  <!-- Formulario para Agregar Tareas -->
+  <div class="task-form">
+    <input type="text" id="productLabel" placeholder="Nombre del Producto" required>
+    <select id="stage" required>
+      <option value="impresion">Impresión</option>
+      <option value="sellado">Sellado</option>
+      <option value="fusionado">Fusionado</option>
+      <option value="troquelado">Troquelado</option>
+      <option value="hotstamping">Hotstamping</option>
+    </select>
+    <select id="day" required>
+      <option value="Lunes">Lunes</option>
+      <option value="Martes">Martes</option>
+      <option value="Miércoles">Miércoles</option>
+      <option value="Jueves">Jueves</option>
+      <option value="Viernes">Viernes</option>
+      <option value="Sábado">Sábado</option>
+      <option value="Domingo">Domingo</option>
+    </select>
+    <select id="hour" required>
+      <!-- Opciones de hora generadas dinámicamente -->
+    </select>
+    <input type="number" id="duration" placeholder="Duración (horas)" min="1" required>
+    <button onclick="addTask()">Agregar Tarea</button>
+  </div>
 
-    <script>
-        function sumarHombre() {
-            var hombres = parseInt(document.getElementById('hombres').value);
-            hombres++;
-            document.getElementById('hombres').value = hombres;
-        }
+  <!-- Tabla de Horario Semanal -->
+  <div class="planner-container">
+    <table id="schedule">
+      <thead>
+        <tr>
+          <th class="hour-col">Hora</th>
+          <th>Lunes</th>
+          <th>Martes</th>
+          <th>Miércoles</th>
+          <th>Jueves</th>
+          <th>Viernes</th>
+          <th>Sábado</th>
+          <th>Domingo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Filas de la tabla generadas por JavaScript -->
+      </tbody>
+    </table>
+  </div>
 
-        function sumarMujer() {
-            var mujeres = parseInt(document.getElementById('mujeres').value);
-            mujeres++;
-            document.getElementById('mujeres').value = mujeres;
-        }
+  <!-- Tabla de Tareas -->
+  <table class="task-table">
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>Etapa</th>
+        <th>Día</th>
+        <th>Hora de Inicio</th>
+        <th>Hora Tentativa de Finalización</th>
+        <th>Operador de Inicio</th>
+        <th>Operador de Finalización</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="taskList">
+      <!-- Filas de tareas generadas por JavaScript -->
+    </tbody>
+  </table>
 
-        function actualizarFechaHora() {
-            var ahora = new Date();
-            var fechaHora = ahora.toLocaleString();
-            document.getElementById('fechaHora').textContent = fechaHora;
-        }
+  <script>
+    // Horas en formato de 24 horas
+    const hours = [...Array(24).keys()];
+    const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+    const tasks = []; // Arreglo para almacenar tareas
 
-        function guardarDatos() {
-            var hombres = parseInt(document.getElementById('hombres').value);
-            var mujeres = parseInt(document.getElementById('mujeres').value);
+    // Función para generar opciones de hora
+    function populateHourOptions() {
+      const hourSelect = document.getElementById("hour");
+      hourSelect.innerHTML = ""; // Limpia opciones previas
+      hours.forEach(hour => {
+        const option = document.createElement("option");
+        option.value = hour;
+        option.textContent = `${hour}:00`;
+        hourSelect.appendChild(option);
+      });
+    }
 
-            localStorage.setItem('conteoHombres', hombres);
-            localStorage.setItem('conteoMujeres', mujeres);
+    // Función para crear filas de horario
+    function generateSchedule() {
+      const tbody = document.querySelector("#schedule tbody");
+      tbody.innerHTML = ''; // Limpia filas previas
 
-            alert('Datos guardados exitosamente.');
-        }
+      hours.forEach(hour => {
+        const row = document.createElement("tr");
 
-        function cargarDatos() {
-            var hombres = localStorage.getItem('conteoHombres');
-            var mujeres = localStorage.getItem('conteoMujeres');
+        // Columna de hora
+        const hourCell = document.createElement("td");
+        hourCell.classList.add("hour-col");
+        hourCell.textContent = `${hour}:00`;
+        row.appendChild(hourCell);
 
-            if (hombres !== null && mujeres !== null) {
-                document.getElementById('hombres').value = hombres;
-                document.getElementById('mujeres').value = mujeres;
-            }
-        }
+        // Columnas de días
+        days.forEach(day => {
+          const cell = document.createElement("td");
+          const task = tasks.find(t => t.day === day && t.hour === hour);
+          if (task) {
+            const taskDiv = document.createElement("div");
+            taskDiv.classList.add("task");
+            taskDiv.innerHTML = `<span class="stage-label">${task.stage}</span>: ${task.label}`;
+            taskDiv.style.backgroundColor = getStageColor(task.stage);
+            cell.appendChild(taskDiv);
+          }
+          row.appendChild(cell);
+        });
 
-        function limpiarContadores() {
-            document.getElementById('hombres').value = 0;
-            document.getElementById('mujeres').value = 0;
-        }
+        tbody.appendChild(row);
+      });
 
-        function mostrarMensaje(mensaje, duracion) {
-            var mensajes = document.getElementsByClassName('mensajes')[0];
-            var nuevoMensaje = document.createElement('p');
-            nuevoMensaje.textContent = mensaje;
-            mensajes.appendChild(nuevoMensaje);
+      updateTaskList(); // Actualiza la tabla de tareas
+    }
 
-            setTimeout(function() {
-                nuevoMensaje.style.display = 'none';
-            }, duracion);
-        }
+    // Función para añadir tarea
+    function addTask() {
+      const label = document.getElementById("productLabel").value.trim();
+      const stage = document.getElementById("stage").value;
+      const day = document.getElementById("day").value;
+      const hour = parseInt(document.getElementById("hour").value);
+      const duration = parseInt(document.getElementById("duration").value);
 
-        actualizarFechaHora(); // Llamada inicial para mostrar la fecha y hora actual
-        setInterval(actualizarFechaHora, 1000); // Actualizar cada segundo
-        cargarDatos(); // Cargar datos almacenados al cargar la página
+      if (label && !isNaN(hour) && !isNaN(duration)) {
+        const endHour = (hour + duration) % 24; // Calcula la hora de finalización
+        tasks.push({ label, stage, day, hour, duration, endHour, startOperator: "", endOperator: "" });
+        generateSchedule();
+      }
+    }
 
-        // Mostrar mensaje por 30 segundos al abrir la página
-        mostrarMensaje("No olvides limpiar los contadores.", 30000);
-    </script>
+    // Función para actualizar la tabla de tareas
+    function updateTaskList() {
+      const taskList = document.getElementById("taskList");
+      taskList.innerHTML = ""; // Limpia tareas previas
+
+      tasks.forEach((task, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${task.label}</td>
+          <td>${task.stage}</td>
+          <td>${task.day}</td>
+          <td>${task.hour}:00</td>
+          <td>${task.endHour}:00</td>
+          <td>${task.startOperator || "N/A"}</td>
+          <td>${task.endOperator || "N/A"}</td>
+          <td>
+            <button onclick="startProduction(${index})">Iniciar Producción</button>
+            <button onclick="endProduction(${index})">Finalizar</button>
+            <button onclick="deleteTask(${index})">Eliminar</button>
+          </td>
+        `;
+        taskList.appendChild(row);
+      });
+    }
+
+    // Función para iniciar producción
+    function startProduction(index) {
+      const operator = prompt("Ingrese el nombre del operador que inicia la producción:");
+      if (operator) {
+        tasks[index].startOperator = operator;
+        updateTaskList();
+      }
+    }
+
+    // Función para finalizar producción
+    function endProduction(index) {
+      const operator = prompt("Ingrese el nombre del operador que finaliza la producción:");
+      if (operator) {
+        tasks[index].endOperator = operator;
+        updateTaskList();
+      }
+    }
+
+    // Función para eliminar tarea
+    function deleteTask(index) {
+      tasks.splice(index, 1);
+      generateSchedule();
+    }
+
+    // Función para obtener el color según la etapa
+    function getStageColor(stage) {
+      switch (stage) {
+        case "impresion": return "black";
+        case "sellado": return "gray";
+        case "fusionado": return "darkgray";
+        case "troquelado": return "silver";
+        case "hotstamping": return "darkslategray";
+        default: return "white";
+      }
+    }
+
+    // Inicializar opciones de hora y generar horario
+    populateHourOptions();
+    generateSchedule();
+  </script>
 </body>
-</html>
